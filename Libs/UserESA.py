@@ -196,10 +196,10 @@ class UserESA():
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('Yes', 1)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('yes', 1)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('YES', 1)
+        self.df['ln2_flag'] = self.df['ln2_flag'].replace('Unavailable', 0)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('No', 0)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('no', 0)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('NO', 0)
-        self.df['ln2_flag'] = self.df['ln2_flag'].replace('Unavailable', 0)
         self.df['ln2_flag'] = self.df['ln2_flag'].replace('-', 0)
 
         #print(self.df)
@@ -551,14 +551,11 @@ class UserESA():
         # roi flag
         # roi_value =1 -> roi_flag=True
         # roi_value =0 -> roi_flag=False
+        resol_raster = self.config.getfloat("experiment", "resol_raster")
         if roi_value == 1:
-            #self.logger.info(f"BL32XU: EIGER X 9M ROI")
-            dist_raster = self.calcDist(self.df['wavelength'], self.config.getfloat("experiment", "resol_raster"), True)
+            self.df['dist_raster'] = self.df.apply(lambda x: self.calcDist(x['wavelength'], resol_raster, True), axis=1)
         else:
-            dist_raster = self.calcDist(self.df['wavelength'], self.config.getfloat("experiment", "resol_raster"), False)
-
-        self.logger.info(f"dist_raster: {dist_raster}")
-        self.df['dist_raster'] = dist_raster
+            self.df['dist_raster'] = self.df.apply(lambda x: self.calcDist(x['wavelength'], resol_raster, False), axis=1)
 
     def makeCondList(self):
         # DataFrameとしてExcelファイルを読み込む　 →　self.df
